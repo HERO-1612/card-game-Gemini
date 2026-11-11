@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f8">
+<title>カードゲーム(Gemini)</title>
+<style>
+:root{color-scheme:light;--bg:#f7f7f8;--panel:#fff;--soft:#f0f1f3;--text:#171717;--muted:#666;--line:#e1e2e5;--green:#26723b;--purple:#8750e8;--orange:#a34b1d;--blue:#27364e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+button{font:inherit;touch-action:manipulation;cursor:pointer}
+button:disabled{opacity:.42;cursor:not-allowed}
+.app{max-width:760px;margin:0 auto;padding:20px 16px 44px}
+header{text-align:center;margin:8px 0 22px}
+h1{font-size:clamp(25px,6vw,38px);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.03em}
+.subtitle{color:var(--muted);font-size:16px;letter-spacing:.08em;margin-top:7px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--soft);border-radius:18px;padding:13px 8px;text-align:center}
+.stat .label{color:var(--muted);font-size:14px}
+.stat .value{font-size:clamp(27px,7vw,38px);font-weight:800;line-height:1.3;font-variant-numeric:tabular-nums}
+.stat.score .value{color:var(--green)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:17px;margin:14px 0}
+.reveal{background:var(--soft);border:0;text-align:center;padding:22px 14px}
+.section-title{font-size:19px;font-weight:750;margin:0 0 13px}
+.card-face{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:112px;min-width:112px;min-height:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:white;box-shadow:0 1px 2px #00000008}
+.card-rank{font-size:28px;font-weight:800;line-height:1.2}
+.deck-mark{width:48px;height:42px;margin:0 auto 5px;display:flex;align-items:center;justify-content:center}
+.deck-mark svg{display:block;width:46px;height:42px}
+.card-caption{color:var(--muted);font-size:14px;margin-top:5px}
+.face-down{background:var(--blue);color:#fff;border-color:var(--blue)}
+.face-down .card-caption{color:#e5eaf2}
+.arrow{color:var(--muted);font-size:23px;margin:5px 0}
+.notice{background:var(--soft);border-radius:15px;padding:12px 14px;margin:13px 0;font-size:14px}
+.phase{margin:18px 0}
+.phase h2,.section h2{font-size:21px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:14px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.btn{border:0;border-radius:999px;padding:12px 18px;min-height:46px;font-weight:700;background:#eceef1;color:var(--text)}
+.btn.primary{background:var(--purple);color:white}
+.btn.success{background:#26723b;color:white}
+.btn.warning{background:#f8e6dc;color:#8b3e16}
+.btn.outline{background:white;border:1px solid #d6d7db;color:#444}
+.btn.block{width:100%;border-radius:15px;min-height:52px}
+.btn.big{font-size:18px;min-height:58px}
+.hand{display:flex;flex-wrap:wrap;gap:10px;margin:13px 0}
+.hand-card{background:var(--soft);border:2px solid transparent;border-radius:17px;min-width:76px;min-height:82px;padding:12px 18px;font-size:29px;font-weight:800}
+.hand-card:active{transform:scale(.98)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pill{border-radius:999px;padding:5px 11px;background:#e9e9eb;font-size:13px}
+.pill.purple{background:#eee5fb;color:#6840ad}.pill.orange{background:#f8e7de;color:#91451d}
+.divider{border:0;border-top:1px solid var(--line);margin:18px 0}
+.history-item{background:var(--soft);border-radius:17px;padding:15px;margin:10px 0}
+.history-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:750}
+.earned{color:var(--green);font-size:20px;font-weight:800;white-space:nowrap}
+.history-sub{margin-top:8px;font-size:14px}
+.breakdown{border-top:1px solid #ddd;margin-top:12px;padding-top:9px}
+.break-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.tag{font-size:12px;padding:4px 9px;border-radius:999px;background:#f8e6dc;color:#8b3e16}
+details{background:var(--soft);border-radius:17px;padding:13px 15px}
+summary{font-weight:750;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"＋";float:right}
+details[open] summary:after{content:"−"}
+.rules{font-size:14px;color:#333}.rules h3{font-size:15px;margin:15px 0 5px}.rules ul{padding-left:20px;margin:5px 0}
+.end{text-align:center;padding:22px}
+.end strong{display:block;font-size:36px;color:var(--green)}
+.small-note{font-size:12px;color:var(--muted)}
+@media(min-width:600px){.app{padding-top:30px}.panel{padding:22px}.stat{padding:17px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><h1>カードゲーム(Gemini)</h1><div class="subtitle">CARD GAME</div></header>
+<section class="stats" aria-label="ゲーム状況">
+  <div class="stat score"><div class="label">合計得点</div><div class="value" id="score">0</div></div>
+  <div class="stat"><div class="label">ターン</div><div class="value" id="turn">1/13</div></div>
+  <div class="stat"><div class="label">山札残り</div><div class="value" id="mountainCount">13</div></div>
+</section>
+<section class="panel reveal">
+  <div class="section-title">公開中の山札カード</div>
+  <div id="currentCard" class="card-face"><div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 48 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L14 9H34L41 17Q42 20 39 20H9Q6 20 7 17Z" stroke="#111827" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 28H39M9 36H39" stroke="#111827" stroke-width="3.2" stroke-linecap="round"/></svg></div><div class="card-caption">未公開</div></div>
+  <div id="prophecyDisplay" hidden><div class="arrow">↓</div><div class="card-face face-down"><div class="card-rank">？</div><div class="card-caption">予言カード</div></div></div>
+</section>
+<div id="notice" class="notice" role="status" aria-live="polite">ゲームを開始できます。</div>
+<section class="panel phase" id="phasePanel"></section>
+<section class="panel section">
+  <h2>手札</h2>
+  <div class="muted" id="handCount">手札 3枚 ／ 自札残り 10枚</div>
+  <div class="hand" id="hand"></div>
+  <div class="pills">
+    <span class="pill purple" id="prophecyUses">予言 残り3回</span>
+    <span class="pill orange" id="reverseUses">リバース 未使用</span>
+    <span class="pill" id="comboBase">コンボ基準 なし</span>
+  </div>
+</section>
+<section class="section">
+  <h2>プレイ履歴</h2>
+  <div id="history"><div class="muted">まだ履歴はありません。</div></div>
+</section>
+<section class="section">
+  <details>
+    <summary>ゲームルール</summary>
+    <div class="rules">
+      <h3>1. ゲームの準備</h3>
+      <ul><li>自札と山札には、それぞれA〜Kの13枚が入っています。</li><li>最初に自札から3枚引いて手札にします。</li><li>A=1、J=11、Q=12、K=13として扱います。</li></ul>
+      <h3>2. ターンの進め方</h3>
+      <ul><li>ターン開始時に、必要なら予言カードを選びます。カードを選ぶ前ならキャンセルできます。</li><li>山札を1枚公開します。</li><li>手札から1枚を出します。予言カードを選んでいる場合は、そのカードを出します。</li><li>出したカードは使い切り、自札から1枚引いて手札を補充します。</li></ul>
+      <h3>3. 得点</h3>
+      <ul><li><b>基本点：</b>出したカードが山札カード以上なら1点。</li><li><b>コンボボーナス：</b>前ターンに出したカードとの数字の差が1以内なら、基本点に加えて3点。</li><li><b>予言ボーナス：</b>予言カードが山札カード以上なら、基本点に加えて2点。</li></ul>
+      <h3>4. 予言</h3>
+      <ul><li>ゲーム全体で3回使用できます。</li><li>ターン開始時に手札から1枚選び、裏向きでセットします。</li><li>カードを選んだ後は取り消せません。リバース後も保持され、次のターンに出します。</li></ul>
+      <h3>5. リバース・チェンジ</h3>
+      <ul><li>ゲーム中1回だけ使用できます。</li><li>手札から1枚と公開中の山札カード1枚を除外します。</li><li>自札から補充して手札を3枚に戻します。</li><li>リバース・チェンジ自体を1ターンとして数え、全13ターンのまま進みます。</li><li>コンボ判定はリセットされます。</li></ul>
+      <h3>6. カードの扱い</h3>
+      <ul><li>使用済み・除外済みのカードは再び手札に戻りません。</li><li>自札と山札はそれぞれ独立してシャッフルされます。</li></ul>
+    </div>
+  </details>
+</section>
+<button class="btn outline block" id="resetButton">↻ ゲームをリセット</button>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const label = n => ({1:"A",11:"J",12:"Q",13:"K"}[n] || String(n));
+const shuffle = arr => {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+};
+let game;
+function newGame(){
+  const own=shuffle(Array.from({length:13},(_,i)=>i+1));
+  game={
+    hand:own.slice(0,3),drawPile:own.slice(3),
+    mountain:shuffle(Array.from({length:13},(_,i)=>i+1)),
+    current:null,prophecy:null,prophecyUses:3,reverseUses:1,
+    turn:1,score:0,lastPlayed:null,history:[],
+    phase:"start",finished:false,reverseArmed:false,notice:"新しいゲームを開始しました。"
+  };
+  render();
+}
+function refill(hand){
+  const next=[...hand],pile=[...game.drawPile];
+  while(next.length<3 && pile.length) next.push(pile.shift());
+  game.drawPile=pile;
+  return next;
+}
+function setNotice(message){game.notice=message;}
+function beginProphecy(){game.phase="chooseProphecy";setNotice("予言に使うカードを選んでください。");render();}
+function cancelProphecy(){game.phase="start";setNotice("予言をキャンセルしました。");render();}
+function chooseProphecy(n){
+  if(game.phase!=="chooseProphecy" || !game.hand.includes(n)) return;
+  game.hand=game.hand.filter(x=>x!==n);
+  game.prophecy=n;game.prophecyUses--;
+  game.phase="revealReady";setNotice("予言カードをセットしました。");render();
+}
+function skipProphecy(){game.phase="revealReady";setNotice("予言せずに進みます。");render();}
+function reveal(){
+  if(game.phase!=="revealReady") return;
+  if(!game.mountain.length){finish("山札がなくなりました。");return;}
+  game.current=game.mountain.shift();
+  game.phase="play";setNotice("山札を公開しました。手札からカードを出してください。");render();
+}
+function armReverse(){
+  if(game.phase!=="play" || game.reverseUses===0 || game.current===null) return;
+  game.reverseArmed=true;setNotice("除外する手札を1枚選んでください。");render();
+}
+function cancelReverse(){game.reverseArmed=false;setNotice("リバース・チェンジをキャンセルしました。");render();}
+function useReverse(n){
+  if(!game.reverseArmed || game.reverseUses===0 || !game.hand.includes(n) || game.current===null) return;
+  const removedMountain=game.current;
+  game.hand=refill(game.hand.filter(x=>x!==n));
+  game.history.unshift({type:"reverse",turn:game.turn,removedHand:n,removedMountain});
+  game.current=null;game.reverseUses=0;game.lastPlayed=null;game.reverseArmed=false;
+  const wasLast=game.turn===13;
+  if(wasLast){game.finished=true;game.phase="end";setNotice("リバース・チェンジを13ターン目に使用しました。ゲーム終了です。");}
+  else{game.turn++;game.phase="start";setNotice("リバース・チェンジを1ターンとして数えました。次のターンに進みます。");}
+  render();
+}
+function playCard(n){
+  if(game.phase!=="play" || game.current===null || game.reverseArmed) return;
+  const isProphecy=game.prophecy!==null;
+  const card=isProphecy?game.prophecy:n;
+  if(!isProphecy && !game.hand.includes(n)) return;
+  const revealed=game.current;
+  const basic=card>=revealed?1:0;
+  const combo=game.lastPlayed!==null && Math.abs(card-game.lastPlayed)<=1 ? 3 : 0;
+  const prophecyBonus=isProphecy && card>=revealed ? 2 : 0;
+  const earned=basic+combo+prophecyBonus;
+  if(!isProphecy) game.hand=game.hand.filter(x=>x!==n);
+  game.hand=refill(game.hand);
+  game.history.unshift({type:"play",turn:game.turn,card,revealed,basic,combo,bonus:prophecyBonus,earned});
+  game.score+=earned;game.lastPlayed=card;game.prophecy=null;game.current=null;game.reverseArmed=false;
+  if(game.turn===13){game.finished=true;game.phase="end";setNotice(`ゲーム終了！合計${game.score}点です。`);}
+  else{game.turn++;game.phase="start";setNotice(`このターンは合計${earned}点です。`);}
+  render();
+}
+function finish(message){game.finished=true;game.phase="end";setNotice(message);render();}
+function render(){
+  $("score").textContent=game.score;
+  $("turn").textContent=`${game.turn}/13`;
+  $("mountainCount").textContent=game.mountain.length;
+  $("currentCard").innerHTML=game.current===null?'<div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 48 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L14 9H34L41 17Q42 20 39 20H9Q6 20 7 17Z" stroke="#111827" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 28H39M9 36H39" stroke="#111827" stroke-width="3.2" stroke-linecap="round"/></svg></div><div class="card-caption">未公開</div>':`<div class="card-rank">${label(game.current)}</div><div class="card-caption">山札</div>`;
+  $("prophecyDisplay").hidden=game.prophecy===null;
+  $("notice").textContent=game.notice;
+  $("handCount").textContent=`手札 ${game.hand.length}枚 ／ 自札残り ${game.drawPile.length}枚`;
+  $("prophecyUses").textContent=`予言 残り${game.prophecyUses}回`;
+  $("reverseUses").textContent=`リバース ${game.reverseUses?"未使用":"使用済み"}`;
+  $("comboBase").textContent=`コンボ基準 ${game.lastPlayed===null?"なし":label(game.lastPlayed)}`;
+  const hand=$("hand");hand.innerHTML="";
+  game.hand.forEach(n=>{const b=document.createElement("button");b.className="hand-card";b.textContent=label(n);b.type="button";b.setAttribute("aria-label",`カード${label(n)}`);hand.appendChild(b);});
+  renderPhase();renderHistory();
+}
+function button(text,cls,action,disabled=false){
+  const b=document.createElement("button");b.type="button";b.className=`btn ${cls||""}`.trim();b.textContent=text;b.disabled=disabled;b.addEventListener("click",action);return b;
+}
+function renderPhase(){
+  const p=$("phasePanel");p.innerHTML="";
+  if(game.finished){
+    p.className="panel end";const h=document.createElement("h2");h.textContent="ゲーム終了！";
+    const score=document.createElement("strong");score.textContent=`${game.score}点`;
+    p.append(h,score,button("もう一度プレイ","primary block",newGame));return;
+  }
+  p.className="panel phase";
+  const title=document.createElement("h2");
+  const small=document.createElement("div");small.className="muted";
+  const actions=document.createElement("div");actions.className="actions";
+  if(game.phase==="start"){
+    title.textContent="ターン開始";
+    if(game.prophecy!==null){
+      small.textContent="前のターンに選んだ予言カードを、このターンに出します。";
+      actions.append(button("次の山札を公開する","success block",skipProphecy));
+    }else{
+      small.textContent=`予言は残り${game.prophecyUses}回です。`;
+      actions.append(button("予言を使う","primary",beginProphecy,game.prophecyUses===0));
+      actions.append(button("予言せず進む","outline",skipProphecy));
+    }
+  }else if(game.phase==="chooseProphecy"){
+    title.textContent="予言カードを選択";
+    small.textContent="カードを選ぶ前ならキャンセルできます。";
+    game.hand.forEach(n=>actions.append(button(label(n),"primary",()=>chooseProphecy(n))));
+    actions.append(button("予言をキャンセル","outline block",cancelProphecy));
+  }else if(game.phase==="revealReady"){
+    title.textContent="山札を公開";
+    small.textContent="下のボタンを押すと山札カードが公開されます。";
+    actions.append(button("山札をめくる","success block big",reveal));
+  }else if(game.phase==="play"){
+    title.textContent="カードを出す";
+    small.textContent=game.prophecy!==null?"選択済みの予言カードを出します。":"手札から出すカードを選んでください。";
+    if(game.prophecy!==null) actions.append(button("予言カードを出す","success block",()=>playCard(null),game.reverseArmed));
+    else game.hand.forEach(n=>actions.append(button(label(n),"success",()=>playCard(n),game.reverseArmed)));
+    if(game.reverseUses>0){
+      const hr=document.createElement("hr");hr.className="divider";p.append(hr);
+      const rh=document.createElement("h2");rh.textContent="リバース・チェンジ";p.append(rh);
+      const desc=document.createElement("div");desc.className="muted";desc.textContent="手札1枚と公開中の山札カードを除外し、自札から補充します。リバース自体を1ターンとして数えます。";p.append(desc);
+      if(!game.reverseArmed) actions.append(button("リバース・チェンジを使う","warning block",armReverse));
+      else{
+        const choose=document.createElement("div");choose.className="muted";choose.textContent="除外する手札を選んでください。";p.append(choose);
+        game.hand.forEach(n=>actions.append(button(`除外：${label(n)}`,"warning",()=>useReverse(n))));
+        actions.append(button("キャンセル","outline block",cancelReverse));
+      }
+    }
+  }
+  p.append(title,small,actions);
+}
+function renderHistory(){
+  const root=$("history");root.innerHTML="";
+  if(!game.history.length){root.innerHTML='<div class="muted">まだ履歴はありません。</div>';return;}
+  game.history.forEach(h=>{
+    const item=document.createElement("article");item.className="history-item";
+    const head=document.createElement("div");head.className="history-head";
+    const turn=document.createElement("span");turn.textContent=`${h.turn}ターン目`;
+    head.append(turn);
+    if(h.type==="reverse"){
+      const tag=document.createElement("span");tag.className="tag";tag.textContent="リバース・チェンジ";head.append(tag);
+      const sub=document.createElement("div");sub.className="history-sub";sub.textContent=`除外した手札：${label(h.removedHand)} ／ 山札：${label(h.removedMountain)}`;
+      item.append(head,sub);
+    }else{
+      const earned=document.createElement("span");earned.className="earned";earned.textContent=`合計 +${h.earned}点`;head.append(earned);
+      const sub=document.createElement("div");sub.className="history-sub";sub.textContent=`出したカード：${label(h.card)} ／ 山札：${label(h.revealed)}`;
+      const breakdown=document.createElement("div");breakdown.className="breakdown";
+      [["基本点",`${h.basic}点`],["コンボボーナス",h.combo?`+${h.combo}点`:"0点"],["予言ボーナス",h.bonus?`+${h.bonus}点`:"0点"]].forEach(([name,value])=>{
+        const row=document.createElement("div");row.className="break-row";const a=document.createElement("span");a.textContent=name;const b=document.createElement("b");b.textContent=value;row.append(a,b);breakdown.append(row);
+      });
+      item.append(head,sub,breakdown);
+    }
+    root.appendChild(item);
+  });
+}
+$("resetButton").addEventListener("click",()=>{if(confirm("現在の試合をリセットして、新しい試合を始めますか？"))newGame();});
+newGame();
+</script>
+</body>
+</html>
